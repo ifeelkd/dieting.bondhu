@@ -1,5 +1,5 @@
 // Dieting Bondhu Service Worker — offline-first cache strategy
-const CACHE = 'db-v1';
+const CACHE = 'db-v2';
 const ASSETS = [
   '/',
   '/index.html',
