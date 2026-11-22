@@ -174,7 +174,7 @@ iframe[title*="Netlify" i],iframe[title*="netlify" i],#nl-badge-frame,#nl-hud-fr
 (function(){try{localStorage.setItem('nl-hud:public:v1',JSON.stringify({hidden:true,dismissed:true}));localStorage.setItem('netlify-badge-dismissed','true');localStorage.setItem('netlify-drawer-hidden','true')}catch(_){}function rmNl(){const s='#nl-badge-frame,#nl-hud-frame,iframe[id*="nl-"],iframe[title*="Netlify" i],iframe[src*="netlify" i],netlify-drawer,[data-netlify-drawer],[class*="netlify-"],div[id*="netlify-"],[id*="nl-hud"],#netlify-drawer,#netlify-badge';document.querySelectorAll(s).forEach(e=>{try{e.remove()}catch(_){e.style.display='none'}})}rmNl();if(window.MutationObserver){new MutationObserver(rmNl).observe(document.documentElement||document,{childList:true,subtree:true})}window.addEventListener('DOMContentLoaded',rmNl);window.addEventListener('load',rmNl);let c=0,t=setInterval(()=>{rmNl();if(++c>15)clearInterval(t)},200)})();
 </script></head><body><div id="app"></div><div id="locked-pill" class="locked-progress"><div class="lp-left"><div class="lp-cal"><span class="mi f" style="color:var(--ac);font-size:20px">local_fire_department</span><b id="lp-cal">0 <span class="mut" style="font-size:12px;font-weight:400">/ 2000 kcal</span></b></div><div class="lp-bar-wrap"><i id="lp-bar" style="width:0%"></i></div></div><div class="lp-stats"><span class="lp-prot" id="lp-prot">P <b>0/135g</b></span><span class="lp-pct" id="lp-pct">0%</span></div></div><div id="md"></div><div id="pv"></div>
 <script>
-const APP_VER = '1.5.1';
+const APP_VER = '1.5.2';
 (function(){if(typeof window==='undefined'||!window.fetch)return;fetch('/version.json?_t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.v&&d.v!==APP_VER){if('caches' in window){caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{Promise.all(regs.map(r=>r.unregister())).then(()=>{location.reload(true)})})}else{location.reload(true)}})}else{location.reload(true)}}}).catch(()=>{})})();
 const raw=[
 ["Besan chilla","B","v",280,16,30,10,15,1,"t","Whisk 1/2 cup besan with water, ajwain, salt, chopped onion and chilli into a pourable batter.|Pour onto a hot greased tawa and spread thin.|Cook 2 min per side until golden. Serve with mint chutney.","Indian"],
@@ -384,7 +384,7 @@ function sp(i){const p=S.pk;S.plan[p.d][p.s]=i;delete S.ck[p.d+'-'+p.s];S.pk=nul
 function pkm(){const p=S.pk,d=p.d,s=p.s,cur=S.plan[d][s],own=R.filter(r=>r.my),sg=pool(s).filter(r=>!r.my).slice(0,S.pm?30:12),card=r=>{const q=pt(r,s);return`<div class="card h" onclick="sp(${r.i})"><div class="ch"><small>${r.i==cur?'Current':r.cu}</small>${dm(r.d)}</div><h3>${r.n}</h3><p class="mut">${macb(r,q)}</p><small>≈ ₹${Math.round(r.rp*q)}</small></div>`};return`<div class="sh" onclick="pkx()"><div onclick="event.stopPropagation()"><small>Day ${d+1} · ${SL[s]}</small><h2>Choose a replacement</h2><p class="mut">Pick one of your own dishes or one of ours. The portion is sized to your target.</p>${own.length?`<p class="sec">Your dishes</p><div class="grid">${own.map(card).join('')}</div>`:''}<p class="sec">Suggested for you</p><div class="grid">${sg.map(card).join('')}</div>${S.pm?'':`<div class="row" style="margin-top:14px"><button class="chip" onclick="S.pm=1;draw()">Show more</button></div>`}<div class="row act"><button class="btn g" onclick="pkx()">Cancel</button></div></div></div>`}
 function cfv(i){const r=R[i];S.cf={n:r.n+' (my version)',m:r.m[0],x:r.g.join('\n'),st:r.s.join('\n'),sv:1,kc:'',pr:'',cb:'',ft:'',rp:r.rp,of:i};S.m=null;draw()}
 const SQ=/^\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(kg|gms?|grams?|g|ml|l|cups?|tbsp|tsp|inch|pieces?|slices?)?\b\s*(?:of\s+)?(.*)$/;
-const CAT=[['Fresh Vegetables & Fruit','🥬'],['Dairy & Eggs','🥛'],['Grains & Staples','🌾'],['Meat & Seafood','🍗'],['Oils, Spices & Pantry','🧂']];
+const CAT=[['Fresh Produce','nutrition'],['Dairy & Eggs','egg'],['Grains & Staples','grain'],['Meat & Seafood','restaurant'],['Oils, Spices & Pantry','kitchen']];
 function parseGroceryLine(raw,factor){
   const l=raw.toLowerCase().trim();
   const m=l.match(/^([\d\/\.\s-]+)\s*(g|gms?|grams?|kg|ml|l|litres?|cups?|tbsp|tsp|pieces?|pcs?|slices?|pinch|handful|scoop|punnet)?\s*(.*)$/i);
@@ -397,37 +397,199 @@ function parseGroceryLine(raw,factor){
   }else val=parseFloat(numStr)||1;
   val*=factor;
   const unit=(m[2]||'').toLowerCase();
-  let name=m[3].replace(/\(.*?\)/g,'').replace(/\b(small|medium|large|chopped|grated|shredded|sliced|thick|boiled|soaked|dry|dried|raw|fresh|cubed|minced)\b/g,'').replace(/\s+/g,' ').trim();
+  let name=m[3].replace(/\(.*?\)/g,'').replace(/\b(small|medium|large|chopped|grated|shredded|sliced|thick|boiled|soaked|dry|dried|raw|fresh|cubed|minced|diced)\b/g,'').replace(/\s+/g,' ').trim();
 
+  if(/^water$/.test(name))return null;
+
+  // 1. FRESH PRODUCE (Vegetables, Greens, Herbs, Fruits)
+  if(/stir-fried veg|mixed veg|chopped veg|steamed veg|veg sticks|^veg$|mixed seasonal veg/.test(name)){
+    return{cat:'Fresh Produce',item:'Mixed fresh vegetables (carrots, beans, peas)',qty:(unit==='cup'?val:val)*150,type:'g'}
+  }
+  if(/^salad$/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh salad vegetables (cucumber, carrot, tomato)',qty:(unit==='cup'?val:val)*150,type:'g'}
+  }
+  if(/onion/.test(name)){
+    return{cat:'Fresh Produce',item:'Onions',qty:(unit===''||unit==='pc')?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
+  }
+  if(/tomato/.test(name)&&!/puree|sauce|ketchup/.test(name)){
+    return{cat:'Fresh Produce',item:'Tomatoes',qty:(unit===''||unit==='pc')?val*80:unit==='g'?val:val*80,type:'g'}
+  }
+  if(/potato/.test(name)&&!/sweet/.test(name)){
+    return{cat:'Fresh Produce',item:'Potatoes',qty:(unit===''||unit==='pc')?val*100:unit==='g'?val:val*100,type:'g'}
+  }
+  if(/sweet potato|shakarkandi/.test(name)){
+    return{cat:'Fresh Produce',item:'Sweet potatoes',qty:(unit===''||unit==='pc')?val*120:val*120,type:'g'}
+  }
+  if(/capsicum|bell pepper|shimla mirch/.test(name)){
+    return{cat:'Fresh Produce',item:'Capsicum (Shimla mirch)',qty:(unit===''||unit==='pc')?val*100:unit==='cup'?val*100:unit==='g'?val:val*100,type:'g'}
+  }
+  if(/cabbage/.test(name)){
+    return{cat:'Fresh Produce',item:'Cabbage',qty:unit==='cup'?val*100:val*150,type:'cabbage'}
+  }
+  if(/cauliflower/.test(name)){
+    return{cat:'Fresh Produce',item:'Cauliflower',qty:unit==='cup'?val*120:val*150,type:'cauliflower'}
+  }
+  if(/broccoli/.test(name)){
+    return{cat:'Fresh Produce',item:'Broccoli',qty:(unit==='cup'||unit==='cups')?val*120:val*150,type:'g'}
+  }
+  if(/spinach|palak/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh spinach (Palak)',qty:unit==='cup'?val*80:unit==='bunch'?val*250:val*100,type:'bunch'}
+  }
+  if(/methi/.test(name)&&!/kasuri/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh methi leaves',qty:unit==='cup'?val*60:unit==='bunch'?val*200:val*60,type:'bunch'}
+  }
+  if(/mustard greens|sarson|fiddlehead fern|dhekiya|greens|chopped greens|mixed greens/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh seasonal greens (Sarson / Greens)',qty:(unit==='cup'||unit==='cups')?val*100:val*150,type:'bunch'}
+  }
+  if(/beans/.test(name)&&!/kidney|soy|moth|moong|baked/.test(name)){
+    return{cat:'Fresh Produce',item:'French beans',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/carrot/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh carrots',qty:unit==='cup'?val*100:(unit===''||unit==='pc')?val*80:val*100,type:'g'}
+  }
+  if(/peas|green peas|yellow peas/.test(name)){
+    return{cat:'Fresh Produce',item:'Green peas',qty:unit==='cup'?val*120:val*120,type:'g'}
+  }
+  if(/sweet corn|corn/.test(name)&&!/flour|meal|oil/.test(name)){
+    return{cat:'Fresh Produce',item:'Sweet corn',qty:unit==='cup'?val*120:val*120,type:'g'}
+  }
+  if(/cucumber/.test(name)){
+    return{cat:'Fresh Produce',item:'Cucumber',qty:(unit===''||unit==='pc')?val*120:val*120,type:'g'}
+  }
+  if(/mushroom/.test(name)){
+    return{cat:'Fresh Produce',item:'Button mushrooms',qty:unit==='cup'?val*100:val*100,type:'punnet'}
+  }
+  if(/lauki|gourd|potol/.test(name)&&!/bitter/.test(name)){
+    return{cat:'Fresh Produce',item:'Bottle gourd / Parwal',qty:unit==='cup'?val*120:val*150,type:'g'}
+  }
+  if(/pumpkin/.test(name)){
+    return{cat:'Fresh Produce',item:'Pumpkin',qty:(unit==='cup'||unit==='cups')?val*120:val*150,type:'g'}
+  }
+  if(/eggplant|baingan|begun|brinjal/.test(name)){
+    return{cat:'Fresh Produce',item:'Brinjal / Eggplant',qty:(unit===''||unit==='pc'||unit==='l')?val*150:val*150,type:'g'}
+  }
+  if(/radish|mooli|turnip|shalgam/.test(name)){
+    return{cat:'Fresh Produce',item:'Radish / Turnip',qty:(unit===''||unit==='pc')?val*120:unit==='cup'?val*100:val*120,type:'g'}
+  }
+  if(/bhindi|okra/.test(name)){
+    return{cat:'Fresh Produce',item:'Bhindi (Okra)',qty:unit==='g'?val:val*150,type:'g'}
+  }
+  if(/arbi|colocasia/.test(name)){
+    return{cat:'Fresh Produce',item:'Arbi (Colocasia)',qty:unit==='g'?val:val*150,type:'g'}
+  }
+  if(/bamboo shoot/.test(name)){
+    return{cat:'Fresh Produce',item:'Bamboo shoot',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/lettuce/.test(name)){
+    return{cat:'Fresh Produce',item:'Lettuce leaves',qty:unit==='cup'?val*80:val*100,type:'bunch'}
+  }
+  if(/papaya/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh papaya (raw / ripe)',qty:unit==='cup'?val*120:val*150,type:'g'}
+  }
+  if(/pomegranate/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh pomegranate',qty:1,type:'item'}
+  }
+  if(/avocado/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh avocado',qty:1,type:'item'}
+  }
+  if(/banana/.test(name)){
+    return{cat:'Fresh Produce',item:'Bananas',qty:Math.ceil(val),type:'banana'}
+  }
+  if(/apple/.test(name)){
+    return{cat:'Fresh Produce',item:'Apples',qty:Math.ceil(val),type:'apple'}
+  }
+  if(/fruit/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh seasonal fruits',qty:unit==='tbsp'?val*20:unit==='cup'?val*150:val*150,type:'g'}
+  }
+  if(/lemon|lime/.test(name)){
+    const count=unit==='tsp'?Math.ceil(val/2):unit==='tbsp'?Math.ceil(val):Math.ceil(val);
+    return{cat:'Fresh Produce',item:'Fresh lemons',qty:Math.max(2,count),type:'lemon'}
+  }
+  if(/green chilli|chilli/.test(name)&&!/sauce|paste|powder|flakes/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh green chillies',qty:100,type:'pack'}
+  }
+  if(/coriander|mint|dhaniya|pudina|curry leaves|basil|herbs/.test(name)&&!/powder|chutney|paste|seeds/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh coriander & mint herbs',qty:1,type:'bunch'}
+  }
+  if(/ginger|garlic/.test(name)&&!/paste|powder/.test(name)){
+    return{cat:'Fresh Produce',item:'Fresh ginger & garlic',qty:150,type:'g'}
+  }
+
+  // 2. GRAINS, FLOURS, DALS & STAPLES
   if(/^roti$|^chapati$|^phulka$|^paratha$|whole-wheat flour|wheat flour/.test(name)){
     return{cat:'Grains & Staples',item:'Whole-wheat atta',qty:unit==='cup'?val*120:val*25,type:'g'}
   }
-  if(/kuttu (roti|atta|flour)/.test(name)){
-    return{cat:'Grains & Staples',item:'Kuttu atta (Buckwheat flour)',qty:val*25,type:'g'}
+  if(/kuttu (roti|atta|flour)|kuttu/.test(name)){
+    return{cat:'Grains & Staples',item:'Kuttu atta (Buckwheat flour)',qty:(unit==='cup'?val*120:val*25),type:'g'}
   }
-  if(/singhara (roti|atta|flour)/.test(name)){
-    return{cat:'Grains & Staples',item:'Singhara atta (Water chestnut flour)',qty:val*25,type:'g'}
+  if(/singhara (roti|atta|flour)|singhara/.test(name)){
+    return{cat:'Grains & Staples',item:'Singhara atta (Water chestnut flour)',qty:(unit==='cup'?val*120:val*25),type:'g'}
   }
-  if(/cooked brown rice|brown rice|cooked rice|jeera rice|steamed rice|boiled rice|^rice$/.test(name)){
+  if(/ragi (flour|atta)|ragi/.test(name)){
+    return{cat:'Grains & Staples',item:'Ragi flour (Finger millet)',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/jowar (flour|atta)|jowar/.test(name)){
+    return{cat:'Grains & Staples',item:'Jowar flour (Sorghum)',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/bajra (flour|atta)|bajra/.test(name)){
+    return{cat:'Grains & Staples',item:'Bajra flour (Pearl millet)',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/makki (flour|atta)/.test(name)){
+    return{cat:'Grains & Staples',item:'Makki atta (Corn flour)',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/rice flour/.test(name)){
+    return{cat:'Grains & Staples',item:'Rice flour',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/rajgira (flour|atta)|rajgira/.test(name)){
+    return{cat:'Grains & Staples',item:'Rajgira flour (Amaranth)',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/cornmeal|polenta/.test(name)){
+    return{cat:'Grains & Staples',item:'Cornmeal / Polenta',qty:unit==='cup'?val*120:val*100,type:'g'}
+  }
+  if(/broken wheat|dalia/.test(name)){
+    return{cat:'Grains & Staples',item:'Dalia (Broken wheat)',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/semiya|vermicelli/.test(name)){
+    return{cat:'Grains & Staples',item:'Whole-wheat semiya',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/millet/.test(name)){
+    return{cat:'Grains & Staples',item:'Millet (Kodo / Barnyard)',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/quinoa/.test(name)){
+    return{cat:'Grains & Staples',item:'Quinoa',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/samak rice|samak/.test(name)){
+    return{cat:'Grains & Staples',item:'Samak rice (Vrat ke chawal)',qty:unit==='cup'?val*100:val*100,type:'g'}
+  }
+  if(/rice|chawal/.test(name)&&!/flour|puffed|flattened/.test(name)){
     return{cat:'Grains & Staples',item:'Raw rice (Basmati / Sona Masoori)',qty:(unit==='cup'||!unit)?val*65:unit==='g'?val:val*65,type:'g'}
   }
-  if(/cooked noodles|noodles/.test(name)){
+  if(/puffed rice|murmura/.test(name)){
+    return{cat:'Grains & Staples',item:'Murmura (Puffed rice)',qty:unit==='cup'?val*30:val*50,type:'g'}
+  }
+  if(/sev|farsan/.test(name)){
+    return{cat:'Grains & Staples',item:'Nylon sev / Farsan',qty:unit==='cup'?val*50:val*50,type:'g'}
+  }
+  if(/bori/.test(name)){
+    return{cat:'Grains & Staples',item:'Dal bori (Dumplings)',qty:1,type:'pack'}
+  }
+  if(/dosa batter|appam|dosas|idli/.test(name)){
+    return{cat:'Grains & Staples',item:'Fresh Dosa / Idli batter',qty:1,type:'pouch'}
+  }
+  if(/bread|pita|tortilla|momo wrapper/.test(name)){
+    return{cat:'Grains & Staples',item:'Whole-wheat bread / Wrappers',qty:val,type:'slice'}
+  }
+  if(/noodles/.test(name)){
     return{cat:'Grains & Staples',item:'Noodles pack',qty:unit==='cup'?val*60:unit==='g'?val:val*60,type:'g'}
   }
-  if(/cooked (whole-wheat )?pasta|pasta/.test(name)){
+  if(/pasta/.test(name)){
     return{cat:'Grains & Staples',item:'Whole-wheat pasta',qty:unit==='cup'?val*65:unit==='g'?val:val*65,type:'g'}
   }
-  if(/boiled (chickpeas|chana)|chickpeas|kabuli chana/.test(name)){
-    return{cat:'Grains & Staples',item:'Kabuli chana (Chickpeas)',qty:unit==='cup'?val*50:unit==='tbsp'?val*15:unit==='g'?val:val*50,type:'g'}
+  if(/besan/.test(name)){
+    return{cat:'Grains & Staples',item:'Besan (Gram flour)',qty:unit==='cup'?val*100:unit==='tbsp'?val*15:unit==='g'?val:val*100,type:'g'}
   }
-  if(/rajma|kidney beans/.test(name)){
-    return{cat:'Grains & Staples',item:'Rajma (Kidney beans)',qty:unit==='cup'?val*50:unit==='tbsp'?val*15:unit==='g'?val:val*50,type:'g'}
-  }
-  if(/kala chana|black chana/.test(name)){
-    return{cat:'Grains & Staples',item:'Kala chana',qty:unit==='cup'?val*50:unit==='tbsp'?val*15:unit==='g'?val:val*50,type:'g'}
-  }
-  if(/roasted chana|bhuna chana/.test(name)){
-    return{cat:'Grains & Staples',item:'Roasted chana (Bhuna chana)',qty:unit==='cup'?val*90:unit==='tbsp'?val*15:unit==='g'?val:val*90,type:'g'}
+  if(/sattu/.test(name)){
+    return{cat:'Grains & Staples',item:'Chana sattu',qty:unit==='tbsp'?val*15:unit==='cup'?val*100:unit==='g'?val:val*50,type:'g'}
   }
   if(/soya/.test(name)){
     return{cat:'Grains & Staples',item:'Soya chunks',qty:unit==='cup'?val*40:unit==='g'?val:val*40,type:'g'}
@@ -438,29 +600,8 @@ function parseGroceryLine(raw,factor){
   if(/poha/.test(name)){
     return{cat:'Grains & Staples',item:'Poha (Flattened rice)',qty:unit==='cup'?val*70:unit==='g'?val:val*70,type:'g'}
   }
-  if(/besan/.test(name)){
-    return{cat:'Grains & Staples',item:'Besan (Gram flour)',qty:unit==='cup'?val*100:unit==='tbsp'?val*15:unit==='g'?val:val*100,type:'g'}
-  }
-  if(/sattu/.test(name)){
-    return{cat:'Grains & Staples',item:'Chana sattu',qty:unit==='tbsp'?val*15:unit==='cup'?val*100:unit==='g'?val:val*50,type:'g'}
-  }
-  if(/moong dal/.test(name)){
-    return{cat:'Grains & Staples',item:'Moong dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
-  }
-  if(/urad dal/.test(name)){
-    return{cat:'Grains & Staples',item:'Urad dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
-  }
-  if(/toor dal/.test(name)){
-    return{cat:'Grains & Staples',item:'Toor dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
-  }
-  if(/masoor dal/.test(name)){
-    return{cat:'Grains & Staples',item:'Masoor dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
-  }
-  if(/chana dal/.test(name)){
-    return{cat:'Grains & Staples',item:'Chana dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
-  }
-  if(/dal|lentil/.test(name)){
-    return{cat:'Grains & Staples',item:'Mixed dal',qty:unit==='cup'?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
+  if(/rava|sooji|semolina/.test(name)){
+    return{cat:'Grains & Staples',item:'Rava (Sooji / Semolina)',qty:unit==='cup'?val*100:val*100,type:'g'}
   }
   if(/sabudana/.test(name)){
     return{cat:'Grains & Staples',item:'Sabudana (Tapioca sago)',qty:unit==='cup'?val*80:unit==='g'?val:val*80,type:'g'}
@@ -468,23 +609,51 @@ function parseGroceryLine(raw,factor){
   if(/makhana/.test(name)){
     return{cat:'Grains & Staples',item:'Fox nuts (Makhana)',qty:unit==='cup'?val*25:unit==='g'?val:val*25,type:'g'}
   }
-  if(/bread|pita/.test(name)){
-    return{cat:'Grains & Staples',item:'Whole-wheat bread / Pita',qty:val,type:'slice'}
+  if(/chickpeas|kabuli chana/.test(name)){
+    return{cat:'Grains & Staples',item:'Kabuli chana (Chickpeas)',qty:unit==='cup'?val*50:val*50,type:'g'}
+  }
+  if(/rajma|kidney beans/.test(name)){
+    return{cat:'Grains & Staples',item:'Rajma (Kidney beans)',qty:unit==='cup'?val*50:val*50,type:'g'}
+  }
+  if(/kala chana|black chana/.test(name)){
+    return{cat:'Grains & Staples',item:'Kala chana',qty:unit==='cup'?val*50:val*50,type:'g'}
+  }
+  if(/roasted chana|bhuna chana/.test(name)){
+    return{cat:'Grains & Staples',item:'Roasted chana (Bhuna chana)',qty:unit==='cup'?val*90:val*90,type:'g'}
+  }
+  if(/lobia|black-eyed/.test(name)){
+    return{cat:'Grains & Staples',item:'Lobia (Black-eyed peas)',qty:unit==='cup'?val*50:val*50,type:'g'}
   }
   if(/sprouts?/.test(name)){
     return{cat:'Grains & Staples',item:'Sprouted moong / beans',qty:unit==='cup'?val*90:unit==='g'?val:val*90,type:'g'}
   }
-  if(/peanuts?/.test(name)&&!/butter/.test(name)){
-    return{cat:'Grains & Staples',item:'Raw / Roasted peanuts',qty:unit==='tbsp'?val*15:unit==='cup'?val*140:unit==='g'?val:val*30,type:'g'}
+  if(/moong dal|whole green moong/.test(name)){
+    return{cat:'Grains & Staples',item:'Moong dal',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/urad dal/.test(name)){
+    return{cat:'Grains & Staples',item:'Urad dal',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/toor dal/.test(name)){
+    return{cat:'Grains & Staples',item:'Toor dal',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/masoor dal/.test(name)){
+    return{cat:'Grains & Staples',item:'Masoor dal',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/chana dal|^chana$/.test(name)){
+    return{cat:'Grains & Staples',item:'Chana dal',qty:unit==='cup'?val*80:val*80,type:'g'}
+  }
+  if(/dal|lentil|sambar$|rasam$/.test(name)){
+    return{cat:'Grains & Staples',item:'Mixed dal (Toor / Moong)',qty:unit==='cup'?val*80:val*80,type:'g'}
   }
 
+  // 3. DAIRY & EGGS
   if(/^eggs?$|^egg\b/.test(name)){
     return{cat:'Dairy & Eggs',item:'Eggs',qty:val,type:'egg'}
   }
   if(/milk/.test(name)){
     return{cat:'Dairy & Eggs',item:'Toned milk',qty:unit==='l'?val*1000:unit==='cup'?val*240:unit==='ml'?val:val*240,type:'ml'}
   }
-  if(/curd|dahi|yogurt|chaas/.test(name)){
+  if(/curd|dahi|yogurt|chaas|raita/.test(name)){
     return{cat:'Dairy & Eggs',item:'Fresh curd (Dahi)',qty:unit==='cup'?val*240:unit==='tbsp'?val*15:unit==='g'?val:val*200,type:'g'}
   }
   if(/paneer/.test(name)){
@@ -499,7 +668,11 @@ function parseGroceryLine(raw,factor){
   if(/butter/.test(name)){
     return{cat:'Dairy & Eggs',item:'Butter',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:unit==='g'?val:val*10,type:'g'}
   }
+  if(/cream/.test(name)){
+    return{cat:'Dairy & Eggs',item:'Fresh cooking cream',qty:1,type:'pouch'}
+  }
 
+  // 4. MEAT & SEAFOOD
   if(/chicken/.test(name)){
     return{cat:'Meat & Seafood',item:'Chicken (breast / curry cut)',qty:unit==='g'?val:unit==='kg'?val*1000:val,type:'g'}
   }
@@ -513,74 +686,33 @@ function parseGroceryLine(raw,factor){
     return{cat:'Meat & Seafood',item:'Mutton (lean cuts)',qty:unit==='g'?val:unit==='kg'?val*1000:val,type:'g'}
   }
 
-  if(/stir-fried veg|mixed veg|chopped veg/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh mixed vegetables (carrots, beans, peas)',qty:(unit==='cup'?val:val)*150,type:'g'}
+  // 5. NUTS & SEEDS
+  if(/peanut/.test(name)&&!/butter/.test(name)){
+    return{cat:'Grains & Staples',item:'Raw / Roasted peanuts',qty:200,type:'g'}
   }
-  if(/^salad$/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh salad vegetables (cucumber, carrot, tomato)',qty:(unit==='cup'?val:val)*150,type:'g'}
+  if(/almond/.test(name)){
+    return{cat:'Grains & Staples',item:'Almonds',qty:100,type:'g'}
   }
-  if(/onion/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Onions',qty:(unit===''||unit==='pc'||unit==='small'||unit==='medium')?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
+  if(/cashew/.test(name)){
+    return{cat:'Grains & Staples',item:'Cashews',qty:100,type:'g'}
   }
-  if(/tomato/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Tomatoes',qty:(unit===''||unit==='pc'||unit==='small'||unit==='medium')?val*80:unit==='g'?val:val*80,type:'g'}
+  if(/walnut/.test(name)){
+    return{cat:'Grains & Staples',item:'Walnuts',qty:100,type:'g'}
   }
-  if(/potato/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Potatoes',qty:(unit===''||unit==='pc'||unit==='small'||unit==='medium')?val*100:unit==='g'?val:val*100,type:'g'}
+  if(/chia seeds?/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Chia seeds',qty:1,type:'spice_pack'}
   }
-  if(/capsicum/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Capsicum (Shimla mirch)',qty:(unit===''||unit==='pc')?val*100:unit==='cup'?val*100:unit==='g'?val:val*100,type:'g'}
+  if(/flax seeds?|sesame seeds?|pumpkin seeds?|sunflower seeds?/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Seeds pack (Sesame / Pumpkin)',qty:1,type:'spice_pack'}
   }
-  if(/cabbage/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Cabbage',qty:unit==='cup'?val*100:val*150,type:'cabbage'}
+  if(/coconut/.test(name)&&!/milk|oil|water/.test(name)){
+    return{cat:'Fresh Produce',item:'Grated / Fresh coconut',qty:1,type:'item'}
   }
-  if(/cauliflower/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Cauliflower',qty:unit==='cup'?val*120:val*150,type:'cauliflower'}
-  }
-  if(/spinach|palak/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh spinach (Palak)',qty:unit==='cup'?val*80:unit==='bunch'?val*250:val*100,type:'bunch'}
-  }
-  if(/methi/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh methi leaves',qty:unit==='cup'?val*60:unit==='bunch'?val*200:val*60,type:'bunch'}
-  }
-  if(/beans/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'French beans',qty:unit==='cup'?val*100:val*100,type:'g'}
-  }
-  if(/cucumber/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Cucumber',qty:(unit===''||unit==='pc')?val*120:val*120,type:'g'}
-  }
-  if(/mushroom/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Button mushrooms',qty:unit==='cup'?val*100:val*100,type:'punnet'}
-  }
-  if(/lauki|gourd/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Bottle gourd (Lauki)',qty:unit==='cup'?val*120:val*150,type:'g'}
-  }
-  if(/banana/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Bananas',qty:Math.ceil(val),type:'banana'}
-  }
-  if(/apple/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Apples',qty:Math.ceil(val),type:'apple'}
-  }
-  if(/fruit/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh seasonal fruits',qty:unit==='tbsp'?val*20:unit==='cup'?val*150:val*150,type:'g'}
-  }
-  if(/lemon|lime/.test(name)){
-    const count=unit==='tsp'?Math.ceil(val/2):unit==='tbsp'?Math.ceil(val):Math.ceil(val);
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh lemons',qty:Math.max(2,count),type:'lemon'}
-  }
-  if(/green chilli|chilli/.test(name)&&!/sauce|paste|powder/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh green chillies',qty:100,type:'pack'}
-  }
-  if(/coriander|mint|dhaniya|pudina/.test(name)&&!/powder|chutney/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh coriander & mint',qty:1,type:'bunch'}
-  }
-  if(/ginger|garlic/.test(name)&&!/paste|powder/.test(name)){
-    return{cat:'Fresh Vegetables & Fruit',item:'Fresh ginger & garlic',qty:150,type:'g'}
+  if(/coconut milk/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Coconut milk',qty:1,type:'pouch'}
   }
 
-  if(/ginger-garlic paste|garlic paste|ginger paste/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Ginger-garlic paste',qty:1,type:'pouch'}
-  }
+  // 6. OILS, SPICES & PANTRY
   if(/oil/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Cooking oil (Mustard / Olive / Sunflower)',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:val*15,type:'ml'}
   }
@@ -593,17 +725,65 @@ function parseGroceryLine(raw,factor){
   if(/honey/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Honey',qty:1,type:'bottle'}
   }
+  if(/jaggery/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Jaggery (Gud)',qty:1,type:'pack'}
+  }
   if(/sendha namak|rock salt/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Sendha namak (Rock salt for vrat)',qty:1,type:'salt_pack'}
   }
   if(/salt/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Iodized table salt',qty:1,type:'salt_pack'}
   }
-  if(/masala|powder|turmeric|cumin|jeera|oregano|paprika|chilli flakes|seeds|curry paste|sauce|chutney/.test(name)){
+  if(/ginger-garlic paste|garlic paste|ginger paste/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Ginger-garlic paste',qty:1,type:'pouch'}
+  }
+  if(/protein powder/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Protein powder (Whey / Plant)',qty:1,type:'jar'}
+  }
+  if(/soy sauce|soya sauce/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Soy sauce',qty:1,type:'bottle'}
+  }
+  if(/chilli sauce|schezwan|peri-peri|bbq sauce|salsa|hot sauce/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Chilli / Table sauce',qty:1,type:'bottle'}
+  }
+  if(/chutney|tamarind|kokum|vinegar/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Chutney / Tamarind pulp',qty:1,type:'pouch'}
+  }
+  if(/hummus|tahini|miso|kimchi/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'jar'}
+  }
+  if(/cornflour/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Cornflour',qty:1,type:'spice_pack'}
+  }
+  if(/curry paste|paste/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'pouch'}
+  }
+  if(/turmeric|haldi/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Turmeric powder (Haldi)',qty:1,type:'spice_pack'}
+  }
+  if(/cumin|jeera/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Cumin seeds (Jeera)',qty:1,type:'spice_pack'}
+  }
+  if(/garam masala/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Garam masala',qty:1,type:'spice_pack'}
+  }
+  if(/chaat masala/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Chaat masala',qty:1,type:'spice_pack'}
+  }
+  if(/mustard seeds|rai/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Mustard seeds (Rai)',qty:1,type:'spice_pack'}
+  }
+  if(/ajwain/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Ajwain (Carom seeds)',qty:1,type:'spice_pack'}
+  }
+  if(/kasuri methi/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Kasuri methi',qty:1,type:'spice_pack'}
+  }
+  if(/masala|powder|pepper|oregano|paprika|chilli flakes|curry powder|seasoning|spice|cardamom|cinnamon|amchur|sumac|rosemary/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'spice_pack'}
   }
 
-  return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:val,type:unit||'item'}
+  return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'spice_pack'}
 }
 
 function formatRetailPackage(item,qty,type,days){
@@ -619,6 +799,7 @@ function formatRetailPackage(item,qty,type,days){
   if(type==='g'){
     const g=Math.ceil(qty);
     if(g<=100)return'100 g pack';
+    if(g<=200)return'200 g pack';
     if(g<=250)return'250 g pack';
     if(g<=500)return'500 g pack';
     if(g<=1000)return'1 kg pack';
@@ -665,16 +846,19 @@ function formatRetailPackage(item,qty,type,days){
     const punnets=Math.ceil(qty/200)||1;
     return punnets<=1?'1 punnet (200g)':punnets+' punnets ('+(punnets*200)+'g)'
   }
-  if(type==='pack'||type==='pouch'||type==='spice_pack'){
+  if(type==='pack'||type==='spice_pack'){
     return'1 pack ('+(days>7?'100g':'50g')+')'
+  }
+  if(type==='pouch'){
+    return'1 pouch ('+(days>7?'200g':'100g')+')'
   }
   if(type==='salt_pack'){
     return'1 packet (1 kg)'
   }
   if(type==='jar'||type==='bottle'){
-    return'1 standard pack'
+    return'1 bottle / jar'
   }
-  return Math.ceil(qty)+' '+type
+  return'1 standard pack'
 }
 
 function shop(a,b,n){
@@ -703,7 +887,7 @@ function shop(a,b,n){
 
 function shopHtml(a,b,n){
   const x=shop(a,b,n);
-  return CAT.map(k=>x.g[k[0]]?`<h3>${k[1]} ${k[0]}</h3><ul>${x.g[k[0]].map(i=>`<li>${i[0]}: ${i[1]}</li>`).join('')}</ul>`:'').join('')
+  return CAT.map(k=>x.g[k[0]]?`<h3>${k[0]}</h3><ul>${x.g[k[0]].map(i=>`<li>${i[0]}: ${i[1]}</li>`).join('')}</ul>`:'').join('')
 }
 function slo(){S.sl={w:S.days>7?(S.day>=28?4:Math.min(Math.floor(S.day/7),3)):'all',n:1};draw()}
 function slx(){S.sl=null;draw()}
@@ -715,14 +899,14 @@ function slr(){const c=S.sl;if(c.w==='all')return[0,S.plan.length];const st=c.w*
 function slText(){
   const c=S.sl,r=slr(),x=shop(r[0],r[1],c.n);
   const dur=c.w=='all'?(S.days>7?'This month':'This week'):(c.w===4?('Days 29–'+S.plan.length):('Week '+(c.w+1)));
-  let t='🛒 *Dieting Bondhu — Shopping List*\n📅 '+dur+' ('+(r[1]-r[0])+' days) · '+c.n+' '+(c.n>1?'people':'person')+'\n───────────────────────────\n';
+  let t='🛒 Dieting Bondhu — Shopping List\n📅 '+dur+' ('+(r[1]-r[0])+' days) · '+c.n+' '+(c.n>1?'people':'person')+'\n───────────────────────────\n';
   CAT.forEach(k=>{
     if(x.g[k[0]]&&x.g[k[0]].length){
-      t+='\n'+k[1]+' *'+k[0].toUpperCase()+'*\n';
+      t+='\n['+k[0].toUpperCase()+']\n';
       x.g[k[0]].forEach(i=>{t+='• '+i[0]+': '+i[1]+'\n'})
     }
   });
-  t+='\n───────────────────────────\nGenerated with Dieting Bondhu 🥦\n'+(location.origin||'https://dietingbondhu.netlify.app');
+  t+='\n───────────────────────────\nGenerated with Dieting Bondhu\n'+(location.origin||'https://dietingbondhu.netlify.app');
   return t
 }
 
@@ -769,7 +953,7 @@ async function shareApp(){
 function slm(){
   const c=S.sl,r=slr(),x=shop(r[0],r[1],c.n);
   const durName=c.w=='all'?(S.days>7?'This month':'This week'):(c.w===4?('Days 29–'+S.plan.length):('Week '+(c.w+1)));
-  return`<div class="sh" onclick="slx()"><div onclick="event.stopPropagation()"><small>${durName} · ${c.n} ${c.n>1?'people':'person'}</small><h2>Shopping list</h2><p class="mut">Aggregated ingredient quantities across your selected plan period. Standard packaging metrics.</p><div class="row" style="margin-top:16px;gap:6px;overflow-x:auto;scrollbar-width:none">${S.days<=7?`<button class="chip ${c.w==='all'?'on':''}" onclick="sls('all')">This week</button>`:`<button class="chip ${c.w===0?'on':''}" onclick="sls(0)">Week 1</button><button class="chip ${c.w===1?'on':''}" onclick="sls(1)">Week 2</button><button class="chip ${c.w===2?'on':''}" onclick="sls(2)">Week 3</button><button class="chip ${c.w===3?'on':''}" onclick="sls(3)">Week 4</button>${S.plan.length>28?`<button class="chip ${c.w===4?'on':''}" onclick="sls(4)">Days 29–${S.plan.length}</button>`:''}<button class="chip ${c.w==='all'?'on':''}" onclick="sls('all')">This month</button>`}<span class="row" style="margin-left:auto;gap:4px"><button class="chip" onclick="slp(-1)" aria-label="Fewer people">${ic('remove')}</button><b>${c.n}</b><button class="chip" onclick="slp(1)" aria-label="More people">${ic('add')}</button></span></div>${CAT.map(k=>x.g[k[0]]&&x.g[k[0]].length?`<p class="sec">${k[1]} ${k[0]}</p>${x.g[k[0]].map((i,j)=>`<label class="sk" style="--i:${Math.min(j,10)}"><input type="checkbox" ${S.sk[i[2]]?'checked':''} onchange="slc('${i[2]}')"><span>${i[0]}</span><b>${i[1]}</b></label>`).join('')}`:'').join('')}<div class="row act" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px"><button class="btn" style="background:#25D366;color:#081810;font-weight:700;border:none" onclick="slWhatsApp()"><svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" style="display:inline-block;vertical-align:middle;margin-right:6px"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.888 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg>WhatsApp</button><button class="btn" onclick="slNotes()">${ic('share')}Save to Notes</button></div><button class="btn g" style="margin-top:8px;width:100%" onclick="slt()">${ic('content_copy')}Copy to clipboard</button></div></div>`
+  return`<div class="sh" onclick="slx()"><div onclick="event.stopPropagation()"><small>${durName} · ${c.n} ${c.n>1?'people':'person'}</small><h2>Shopping list</h2><p class="mut">Aggregated ingredient quantities across your selected plan period. Standard packaging metrics.</p><div class="row" style="margin-top:16px;gap:6px;overflow-x:auto;scrollbar-width:none">${S.days<=7?`<button class="chip ${c.w==='all'?'on':''}" onclick="sls('all')">This week</button>`:`<button class="chip ${c.w===0?'on':''}" onclick="sls(0)">Week 1</button><button class="chip ${c.w===1?'on':''}" onclick="sls(1)">Week 2</button><button class="chip ${c.w===2?'on':''}" onclick="sls(2)">Week 3</button><button class="chip ${c.w===3?'on':''}" onclick="sls(3)">Week 4</button>${S.plan.length>28?`<button class="chip ${c.w===4?'on':''}" onclick="sls(4)">Days 29–${S.plan.length}</button>`:''}<button class="chip ${c.w==='all'?'on':''}" onclick="sls('all')">This month</button>`}<span class="row" style="margin-left:auto;gap:4px"><button class="chip" onclick="slp(-1)" aria-label="Fewer people">${ic('remove')}</button><b>${c.n}</b><button class="chip" onclick="slp(1)" aria-label="More people">${ic('add')}</button></span></div>${CAT.map(k=>x.g[k[0]]&&x.g[k[0]].length?`<p class="sec">${ic(k[1])} ${k[0]}</p>${x.g[k[0]].map((i,j)=>`<label class="sk" style="--i:${Math.min(j,10)}"><input type="checkbox" ${S.sk[i[2]]?'checked':''} onchange="slc('${i[2]}')"><span>${i[0]}</span><b>${i[1]}</b></label>`).join('')}`:'').join('')}<div class="row act" style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:20px"><button class="btn" style="background:#25D366;color:#081810;font-weight:700;border:none" onclick="slWhatsApp()">${ic('chat')}WhatsApp</button><button class="btn" onclick="slNotes()">${ic('note_add')}Save to Notes</button></div><button class="btn g" style="margin-top:8px;width:100%" onclick="slt()">${ic('content_copy')}Copy full list</button></div></div>`
 }
 function wl(){const a=S.wl.slice(-12);if(a.length<2)return'<p class="mut" style="margin-top:12px">Log your weight on a few different days to see your trend.</p>';const ws=a.map(x=>x.w),mn=Math.min(...ws)-.5,mx=Math.max(...ws)+.5,pts=a.map((x,i)=>[10+i*280/(a.length-1),70-(x.w-mn)/(mx-mn)*60]);return`<svg viewBox="0 0 300 80" style="margin-top:12px" width="100%" height="96" role="img" aria-label="Weight trend"><polyline fill="none" stroke="var(--ac)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" points="${pts.map(p=>p.join(',')).join(' ')}"/>${pts.map(p=>`<circle cx="${p[0]}" cy="${p[1]}" r="3.5" fill="var(--ac)"/>`).join('')}</svg>`}
 function wtip(){const a=S.wl;if(a.length<2)return'';const f=a[0],l=a[a.length-1],days=Math.max(1,(new Date(l.d)-new Date(f.d))/864e5),wk=(l.w-f.w)/days*7,g=S.P.g;let t='';if(days<10)t='Keep logging. A trend means more after about two weeks.';else if(g=='lose')t=wk<-1?'Losing faster than 1 kg a week. Eat a little more to protect muscle.':wk<-.15?'On track for steady fat loss.':'Progress has stalled. Check portions and weekends, or trim 100 to 150 kcal.';else if(g=='gain')t=wk>.5?'Gaining faster than 0.5 kg a week, likely more fat than muscle. Ease off by about 150 kcal.':wk>.1?'On track for a lean gain.':'Not gaining yet. Add about 200 kcal, for example a protein shake in milk.';else t=Math.abs(wk)<.3?'Holding steady, as planned.':'Weight is drifting. Adjust portions by about 100 kcal.';return`<p class="mut" style="margin-top:8px">${l.w-f.w>0?'+':''}${(l.w-f.w).toFixed(1)} kg since ${f.d} (${wk>0?'+':''}${wk.toFixed(2)} kg a week). ${t}</p>`}
