@@ -1,5 +1,5 @@
 // Dieting Bondhu Service Worker — auto-updating offline-first strategy
-const CACHE_NAME = 'db-v4';
+const CACHE_NAME = 'db-v5';
 const FONT_CACHE = 'db-fonts-v1';
 const ASSETS = [
   '/',
@@ -37,6 +37,12 @@ self.addEventListener('activate', e => {
 // Fetch handler
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
+
+  // 0. Version check: strictly bypass all caching
+  if (url.pathname === '/version.json') {
+    e.respondWith(fetch(e.request, { cache: 'no-store' }));
+    return;
+  }
 
   // 1. Google Fonts: Cache-first (fonts never change once downloaded)
   if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {

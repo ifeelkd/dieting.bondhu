@@ -1,15 +1,17 @@
 # Netlify Cache Control Headers for Dieting Bondhu PWA
 
-# Service worker must never be cached by the browser
+# Service worker & version check must never be cached by the browser
 /sw.js
   Cache-Control: no-cache, no-store, must-revalidate
   Service-Worker-Allowed: /
+/version.json
+  Cache-Control: no-cache, no-store, must-revalidate
 
 # Main HTML pages must always revalidate so new deploys are loaded immediately
 /
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 /index.html
-  Cache-Control: no-cache, must-revalidate
+  Cache-Control: no-cache, no-store, must-revalidate
 
 # Web App Manifest
 /manifest.json
