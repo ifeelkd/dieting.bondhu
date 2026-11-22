@@ -1,42 +1,50 @@
-// Dieting Bondhu Service Worker — offline-first cache strategy
-const CACHE = 'db-v2';
+// Dieting Bondhu Service Worker — auto-updating offline-first strategy
+const CACHE_NAME = 'db-v4';
+const FONT_CACHE = 'db-fonts-v1';
 const ASSETS = [
   '/',
   '/index.html',
   '/icon.svg',
+  '/icon-192.png',
+  '/icon-512.png',
   '/manifest.json'
 ];
-const FONT_CACHE = 'db-fonts-v1';
 
-// Install: pre-cache the shell
+// Handle skipWaiting message from client
+self.addEventListener('message', e => {
+  if (e.data && e.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+});
+
+// Install: pre-cache core shell & activate immediately without waiting
 self.addEventListener('install', e => {
+  self.skipWaiting();
   e.waitUntil(
-    caches.open(CACHE)
-      .then(c => c.addAll(ASSETS))
-      .then(() => self.skipWaiting())
+    caches.open(CACHE_NAME).then(c => c.addAll(ASSETS))
   );
 });
 
-// Activate: clean old caches
+// Activate: clean up outdated caches & claim all open clients immediately
 self.addEventListener('activate', e => {
   e.waitUntil(
     caches.keys().then(keys =>
-      Promise.all(keys.filter(k => k !== CACHE && k !== FONT_CACHE).map(k => caches.delete(k)))
+      Promise.all(keys.filter(k => k !== CACHE_NAME && k !== FONT_CACHE).map(k => caches.delete(k)))
     ).then(() => self.clients.claim())
   );
 });
 
-// Fetch: cache-first for app shell and fonts, network-first for everything else
+// Fetch handler
 self.addEventListener('fetch', e => {
   const url = new URL(e.request.url);
 
-  // Google Fonts — cache permanently once fetched
+  // 1. Google Fonts: Cache-first (fonts never change once downloaded)
   if (url.hostname.includes('fonts.googleapis.com') || url.hostname.includes('fonts.gstatic.com')) {
     e.respondWith(
       caches.open(FONT_CACHE).then(cache =>
-        cache.match(e.request).then(r =>
-          r || fetch(e.request).then(res => {
-            if (res.ok) cache.put(e.request, res.clone());
+        cache.match(e.request).then(cached =>
+          cached || fetch(e.request).then(res => {
+            if (res && res.status === 200) cache.put(e.request, res.clone());
             return res;
           })
         )
@@ -45,23 +53,44 @@ self.addEventListener('fetch', e => {
     return;
   }
 
-  // App shell — cache first, fallback to network
-  if (url.origin === location.origin) {
+  // 2. HTML navigation requests (/, /index.html): Network-First!
+  // Always fetch fresh HTML from network so new updates show up immediately.
+  // If offline or request fails, seamlessly fall back to cached shell.
+  if (e.request.mode === 'navigate' || url.pathname === '/' || url.pathname === '/index.html') {
     e.respondWith(
-      caches.match(e.request).then(r =>
-        r || fetch(e.request).then(res => {
-          if (res.ok) {
+      fetch(e.request)
+        .then(res => {
+          if (res && res.status === 200) {
             const clone = res.clone();
-            caches.open(CACHE).then(c => c.put(e.request, clone));
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
           }
           return res;
         })
-      ).catch(() => caches.match('/index.html'))
+        .catch(() => caches.match(e.request).then(c => c || caches.match('/index.html')))
     );
     return;
   }
 
-  // Everything else — network with cache fallback
+  // 3. Same-origin assets (icons, manifest): Stale-While-Revalidate
+  // Return cached version fast, while fetching fresh copy in background.
+  if (url.origin === location.origin) {
+    e.respondWith(
+      caches.match(e.request).then(cached => {
+        const netFetch = fetch(e.request).then(res => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
+          }
+          return res;
+        }).catch(() => null);
+
+        return cached || netFetch;
+      })
+    );
+    return;
+  }
+
+  // 4. Any external requests: Network with cache fallback
   e.respondWith(
     fetch(e.request).catch(() => caches.match(e.request))
   );
