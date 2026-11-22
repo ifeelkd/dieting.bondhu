@@ -174,7 +174,7 @@ iframe[title*="Netlify" i],iframe[title*="netlify" i],#nl-badge-frame,#nl-hud-fr
 (function(){try{localStorage.setItem('nl-hud:public:v1',JSON.stringify({hidden:true,dismissed:true}));localStorage.setItem('netlify-badge-dismissed','true');localStorage.setItem('netlify-drawer-hidden','true')}catch(_){}function rmNl(){const s='#nl-badge-frame,#nl-hud-frame,iframe[id*="nl-"],iframe[title*="Netlify" i],iframe[src*="netlify" i],netlify-drawer,[data-netlify-drawer],[class*="netlify-"],div[id*="netlify-"],[id*="nl-hud"],#netlify-drawer,#netlify-badge';document.querySelectorAll(s).forEach(e=>{try{e.remove()}catch(_){e.style.display='none'}})}rmNl();if(window.MutationObserver){new MutationObserver(rmNl).observe(document.documentElement||document,{childList:true,subtree:true})}window.addEventListener('DOMContentLoaded',rmNl);window.addEventListener('load',rmNl);let c=0,t=setInterval(()=>{rmNl();if(++c>15)clearInterval(t)},200)})();
 </script></head><body><div id="app"></div><div id="locked-pill" class="locked-progress"><div class="lp-left"><div class="lp-cal"><span class="mi f" style="color:var(--ac);font-size:20px">local_fire_department</span><b id="lp-cal">0 <span class="mut" style="font-size:12px;font-weight:400">/ 2000 kcal</span></b></div><div class="lp-bar-wrap"><i id="lp-bar" style="width:0%"></i></div></div><div class="lp-stats"><span class="lp-prot" id="lp-prot">P <b>0/135g</b></span><span class="lp-pct" id="lp-pct">0%</span></div></div><div id="md"></div><div id="pv"></div>
 <script>
-const APP_VER = '1.5.2';
+const APP_VER = '1.5.3';
 (function(){if(typeof window==='undefined'||!window.fetch)return;fetch('/version.json?_t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.v&&d.v!==APP_VER){if('caches' in window){caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{Promise.all(regs.map(r=>r.unregister())).then(()=>{location.reload(true)})})}else{location.reload(true)}})}else{location.reload(true)}}}).catch(()=>{})})();
 const raw=[
 ["Besan chilla","B","v",280,16,30,10,15,1,"t","Whisk 1/2 cup besan with water, ajwain, salt, chopped onion and chilli into a pourable batter.|Pour onto a hot greased tawa and spread thin.|Cook 2 min per side until golden. Serve with mint chutney.","Indian"],
@@ -411,7 +411,7 @@ function parseGroceryLine(raw,factor){
   if(/onion/.test(name)){
     return{cat:'Fresh Produce',item:'Onions',qty:(unit===''||unit==='pc')?val*80:unit==='tbsp'?val*15:unit==='g'?val:val*80,type:'g'}
   }
-  if(/tomato/.test(name)&&!/puree|sauce|ketchup/.test(name)){
+  if(/tomato/.test(name)&&!/puree|sauce|ketchup|paste/.test(name)){
     return{cat:'Fresh Produce',item:'Tomatoes',qty:(unit===''||unit==='pc')?val*80:unit==='g'?val:val*80,type:'g'}
   }
   if(/potato/.test(name)&&!/sweet/.test(name)){
@@ -650,7 +650,10 @@ function parseGroceryLine(raw,factor){
   if(/^eggs?$|^egg\b/.test(name)){
     return{cat:'Dairy & Eggs',item:'Eggs',qty:val,type:'egg'}
   }
-  if(/milk/.test(name)){
+  if(/coconut milk/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Coconut milk',qty:1,type:'tetra_pack'}
+  }
+  if(/milk/.test(name)&&!/coconut/.test(name)){
     return{cat:'Dairy & Eggs',item:'Toned milk',qty:unit==='l'?val*1000:unit==='cup'?val*240:unit==='ml'?val:val*240,type:'ml'}
   }
   if(/curd|dahi|yogurt|chaas|raita/.test(name)){
@@ -665,7 +668,10 @@ function parseGroceryLine(raw,factor){
   if(/cheese/.test(name)){
     return{cat:'Dairy & Eggs',item:'Cheese slices / block',qty:unit==='tbsp'?val*15:unit==='g'?val:val*20,type:'g'}
   }
-  if(/butter/.test(name)){
+  if(/peanut butter/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Peanut butter',qty:1,type:'peanut_butter'}
+  }
+  if(/butter/.test(name)&&!/peanut/.test(name)){
     return{cat:'Dairy & Eggs',item:'Butter',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:unit==='g'?val:val*10,type:'g'}
   }
   if(/cream/.test(name)){
@@ -708,25 +714,19 @@ function parseGroceryLine(raw,factor){
   if(/coconut/.test(name)&&!/milk|oil|water/.test(name)){
     return{cat:'Fresh Produce',item:'Grated / Fresh coconut',qty:1,type:'item'}
   }
-  if(/coconut milk/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Coconut milk',qty:1,type:'pouch'}
-  }
 
   // 6. OILS, SPICES & PANTRY
-  if(/oil/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Cooking oil (Mustard / Olive / Sunflower)',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:val*15,type:'ml'}
+  if(/\boils?\b/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Cooking oil (Mustard / Olive / Sunflower)',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:val*15,type:'oil'}
   }
   if(/ghee/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Desi ghee',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:unit==='g'?val:val*10,type:'g'}
-  }
-  if(/peanut butter/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Peanut butter',qty:1,type:'jar'}
+    return{cat:'Oils, Spices & Pantry',item:'Desi ghee',qty:unit==='tsp'?val*5:unit==='tbsp'?val*15:unit==='g'?val:val*10,type:'ghee'}
   }
   if(/honey/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Honey',qty:1,type:'bottle'}
+    return{cat:'Oils, Spices & Pantry',item:'Honey',qty:1,type:'honey'}
   }
   if(/jaggery/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Jaggery (Gud)',qty:1,type:'pack'}
+    return{cat:'Oils, Spices & Pantry',item:'Jaggery (Gud)',qty:1,type:'jaggery'}
   }
   if(/sendha namak|rock salt/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Sendha namak (Rock salt for vrat)',qty:1,type:'salt_pack'}
@@ -737,8 +737,11 @@ function parseGroceryLine(raw,factor){
   if(/ginger-garlic paste|garlic paste|ginger paste/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Ginger-garlic paste',qty:1,type:'pouch'}
   }
+  if(/fruit salt|eno/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Fruit salt (Eno)',qty:1,type:'fruit_salt'}
+  }
   if(/protein powder/.test(name)){
-    return{cat:'Oils, Spices & Pantry',item:'Protein powder (Whey / Plant)',qty:1,type:'jar'}
+    return{cat:'Oils, Spices & Pantry',item:'Protein powder (Whey / Plant)',qty:1,type:'protein_powder'}
   }
   if(/soy sauce|soya sauce/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Soy sauce',qty:1,type:'bottle'}
@@ -746,10 +749,16 @@ function parseGroceryLine(raw,factor){
   if(/chilli sauce|schezwan|peri-peri|bbq sauce|salsa|hot sauce/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Chilli / Table sauce',qty:1,type:'bottle'}
   }
+  if(/tomato puree|tomato paste/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:'Tomato puree',qty:1,type:'tetra_pack'}
+  }
   if(/chutney|tamarind|kokum|vinegar/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:'Chutney / Tamarind pulp',qty:1,type:'pouch'}
   }
-  if(/hummus|tahini|miso|kimchi/.test(name)){
+  if(/hummus|tahini/.test(name)){
+    return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'tub'}
+  }
+  if(/kimchi|miso/.test(name)){
     return{cat:'Oils, Spices & Pantry',item:name.charAt(0).toUpperCase()+name.slice(1),qty:1,type:'jar'}
   }
   if(/cornflour/.test(name)){
@@ -787,6 +796,91 @@ function parseGroceryLine(raw,factor){
 }
 
 function formatRetailPackage(item,qty,type,days){
+  const lItem=(item||'').toLowerCase();
+
+  // 1. Explicit Pantry containers with exact grocery volumes & weights
+  if(/cooking oil|oil\b/.test(lItem)){
+    const ml=Math.ceil(qty);
+    if(days<=7){
+      return ml<=500?'1 bottle (500 ml)':'1 bottle (1 L)'
+    }else{
+      if(ml<=1000)return'1 bottle (1 L)';
+      if(ml<=2000)return'2 bottles (1 L each)';
+      if(ml<=5000)return Math.ceil(ml/1000)+' L can';
+      return Math.ceil(ml/1000)+' L'
+    }
+  }
+
+  if(/ghee/.test(lItem)){
+    const g=Math.ceil(qty);
+    if(days<=7){
+      return g<=200?'1 jar (200 ml / 200 g)':'1 jar (500 ml)'
+    }else{
+      return g<=500?'1 jar (500 ml)':'1 jar (1 L / 1 kg)'
+    }
+  }
+
+  if(/peanut butter/.test(lItem)){
+    return days<=7?'1 jar (350 g)':'1 jar (1 kg)'
+  }
+
+  if(/honey/.test(lItem)){
+    return days<=7?'1 bottle (250 g)':'1 bottle (500 g)'
+  }
+
+  if(/protein powder/.test(lItem)){
+    return days<=7?'1 jar (500 g)':'1 tub / jar (1 kg)'
+  }
+
+  if(/soy sauce|soya sauce/.test(lItem)){
+    return days<=7?'1 bottle (200 ml)':'1 bottle (500 ml)'
+  }
+
+  if(/chilli.*sauce|sauce|ketchup|schezwan|salsa|hot sauce/.test(lItem)){
+    return days<=7?'1 bottle (200 g)':'1 bottle (500 g)'
+  }
+
+  if(/tahini|hummus/.test(lItem)){
+    return'1 tub (200 g)'
+  }
+
+  if(/kimchi|miso/.test(lItem)){
+    return days<=7?'1 jar (250 g)':'1 jar (500 g)'
+  }
+
+  if(/coconut milk/.test(lItem)){
+    return days<=7?'1 tetra pack (200 ml)':'2 tetra packs (200 ml each)'
+  }
+
+  if(/tomato puree/.test(lItem)){
+    return days<=7?'1 tetra pack (200 g)':'2 tetra packs (200 g each)'
+  }
+
+  if(/jaggery|gud/.test(lItem)){
+    return days<=7?'1 pack (500 g)':'1 pack (1 kg)'
+  }
+
+  if(/sendha namak|rock salt/.test(lItem)){
+    return days<=7?'1 pack (500 g)':'1 pack (1 kg)'
+  }
+
+  if(/salt/.test(lItem)){
+    return'1 packet (1 kg)'
+  }
+
+  if(/ginger-garlic paste|paste\b/.test(lItem)){
+    return days<=7?'1 pouch (100 g)':'1 pouch (200 g)'
+  }
+
+  if(/chutney|tamarind/.test(lItem)){
+    return days<=7?'1 pouch (100 g)':'1 pouch (200 g)'
+  }
+
+  if(/fruit salt|eno/.test(lItem)){
+    return'1 bottle (100 g)'
+  }
+
+  // Eggs
   if(type==='egg'){
     const count=Math.ceil(qty);
     if(count<=6)return'6 eggs (1/2 dozen)';
@@ -796,6 +890,19 @@ function formatRetailPackage(item,qty,type,days){
     if(count<=60)return count+' eggs (2 trays)';
     return count+' eggs ('+Math.ceil(count/30)+' trays)'
   }
+
+  // Milk / liquid
+  if(type==='ml'){
+    const ml=Math.ceil(qty);
+    if(ml<=250)return'250 ml pack';
+    if(ml<=500)return'500 ml pouch';
+    if(ml<=1000)return'1 L carton';
+    if(ml<=2000)return'2 L (4 pouches of 500 ml)';
+    const l=Math.ceil(ml/1000);
+    return l+' L ('+(l*2)+' pouches of 500 ml)'
+  }
+
+  // Grams
   if(type==='g'){
     const g=Math.ceil(qty);
     if(g<=100)return'100 g pack';
@@ -808,59 +915,74 @@ function formatRetailPackage(item,qty,type,days){
     const kg=Math.ceil((g/1000)*2)/2;
     return(kg%1===0?kg.toFixed(0):kg.toFixed(1))+' kg'
   }
-  if(type==='ml'){
-    const ml=Math.ceil(qty);
-    if(ml<=250)return'250 ml pack';
-    if(ml<=500)return'500 ml pouch';
-    if(ml<=1000)return'1 L bottle';
-    if(ml<=2000)return'2 L pack';
-    return Math.ceil(ml/1000)+' L'
-  }
+
   if(type==='slice'){
     const s=Math.ceil(qty);
     return s<=12?'1 loaf (400g bread)':Math.ceil(s/12)+' loaves (400g bread)'
   }
+
   if(type==='banana'){
     const count=Math.ceil(qty);
     if(count<=6)return'6 pcs (half dozen)';
     if(count<=12)return'12 pcs (1 dozen)';
     return count+' pcs ('+Math.ceil(count/12)+' dozen)'
   }
+
   if(type==='apple'){
     const count=Math.ceil(qty);
     return count<=4?count+' pcs (~500g)':Math.ceil(count/4)*500+' g (~'+count+' apples)'
   }
+
   if(type==='lemon'){
     const count=Math.ceil(qty);
     return(days>7?Math.min(count,12):Math.min(count,6))+' pcs'
   }
+
   if(type==='bunch'){
     const bunches=Math.ceil(qty/250)||1;
     return bunches<=1?'1 bunch (250g)':bunches+' bunches ('+(bunches*250)+'g)'
   }
+
   if(type==='cabbage'||type==='cauliflower'){
     const pcs=Math.ceil(qty/500)||1;
     return pcs<=1?'1 pc (~500g)':pcs+' pcs (~'+(pcs*500)+'g)'
   }
+
   if(type==='punnet'){
     const punnets=Math.ceil(qty/200)||1;
     return punnets<=1?'1 punnet (200g)':punnets+' punnets ('+(punnets*200)+'g)'
   }
-  if(type==='pack'||type==='spice_pack'){
+
+  if(type==='spice_pack'||type==='pack'){
     return'1 pack ('+(days>7?'100g':'50g')+')'
   }
+
   if(type==='pouch'){
     return'1 pouch ('+(days>7?'200g':'100g')+')'
   }
+
   if(type==='salt_pack'){
     return'1 packet (1 kg)'
   }
-  if(type==='jar'||type==='bottle'){
-    return'1 bottle / jar'
-  }
-  return'1 standard pack'
-}
 
+  if(type==='jar'){
+    return'1 jar ('+(days>7?'500g':'250g')+')'
+  }
+
+  if(type==='bottle'){
+    return'1 bottle ('+(days>7?'500ml':'250ml')+')'
+  }
+
+  if(type==='tub'){
+    return'1 tub (200 g)'
+  }
+
+  if(type==='tetra_pack'){
+    return days>7?'2 tetra packs (200 ml each)':'1 tetra pack (200 ml)'
+  }
+
+  return'1 pack ('+(days>7?'100g':'50g')+')'
+}
 function shop(a,b,n){
   const map={},days=b-a;
   for(let d=a;d<b&&d<S.plan.length;d++){
