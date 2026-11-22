@@ -1,5 +1,5 @@
 // Dieting Bondhu Service Worker — auto-updating offline-first strategy
-const CACHE_NAME = 'db-v11';
+const CACHE_NAME = 'db-v12';
 const FONT_CACHE = 'db-fonts-v1';
 const ASSETS = [
   '/',
