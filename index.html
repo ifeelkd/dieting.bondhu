@@ -50,7 +50,7 @@ label{display:block;font-size:13px;color:var(--mut)}
 .tabs{display:flex;gap:8px;overflow-x:auto;padding:4px 0;margin-top:16px;scrollbar-width:none}
 .big{display:block;font-size:1.6rem;font-weight:600;margin:2px 0 8px}.big span{font-size:12px;color:var(--mut);font-weight:400}
 .fade{animation:up .55s cubic-bezier(.2,.8,.2,1) both}@keyframes up{from{opacity:0;transform:translateY(14px)}}
-.sh{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:20;animation:fi .25s}@keyframes fi{from{opacity:0}}
+.sh{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-end;justify-content:center;z-index:100;animation:fi .25s}@keyframes fi{from{opacity:0}}
 .sh>div{background:var(--card);width:min(580px,100%);max-height:88dvh;overflow:auto;border-radius:22px 22px 0 0;padding:24px;animation:up .4s cubic-bezier(.2,.8,.2,1)}
 .sh ol,.sh ul{padding-left:20px;margin:8px 0 14px}.sh li{margin-bottom:6px}.st{margin:14px 0}.in{font-size:16px}@media(max-width:640px){main{padding-bottom:96px}h1{font-size:2rem}.tl{width:100%}.st{grid-template-columns:1fr 1fr}.big{font-size:1.25rem}.nav{position:fixed;left:0;right:0;bottom:0;margin:0;padding:8px 10px calc(10px + env(safe-area-inset-bottom,12px));background:var(--card);border-top:1px solid var(--bd);justify-content:space-around;z-index:30;box-shadow:0 -4px 16px rgba(0,0,0,.08)}.nav .chip{flex:1;border:0;padding:8px 4px;flex-direction:column;gap:2px;font-size:12px}.nav .chip .mi{margin:0}.sh>div{padding:0 18px calc(20px + env(safe-area-inset-bottom,0px))}}
 @media(min-width:700px){.sh{align-items:center}.sh>div{border-radius:22px}}
@@ -175,7 +175,7 @@ iframe[title*="Netlify" i],iframe[title*="netlify" i],#nl-badge-frame,#nl-hud-fr
 (function(){try{localStorage.setItem('nl-hud:public:v1',JSON.stringify({hidden:true,dismissed:true}));localStorage.setItem('netlify-badge-dismissed','true');localStorage.setItem('netlify-drawer-hidden','true')}catch(_){}function rmNl(){const s='#nl-badge-frame,#nl-hud-frame,iframe[id*="nl-"],iframe[title*="Netlify" i],iframe[src*="netlify" i],netlify-drawer,[data-netlify-drawer],[class*="netlify-"],div[id*="netlify-"],[id*="nl-hud"],#netlify-drawer,#netlify-badge';document.querySelectorAll(s).forEach(e=>{try{e.remove()}catch(_){e.style.display='none'}})}rmNl();if(window.MutationObserver){new MutationObserver(rmNl).observe(document.documentElement||document,{childList:true,subtree:true})}window.addEventListener('DOMContentLoaded',rmNl);window.addEventListener('load',rmNl);let c=0,t=setInterval(()=>{rmNl();if(++c>15)clearInterval(t)},200)})();
 </script></head><body><div id="app"></div><div id="locked-pill" class="locked-progress"><div class="lp-left"><div class="lp-cal"><span class="mi f" style="color:var(--ac);font-size:20px">local_fire_department</span><b id="lp-cal">0 <span class="mut" style="font-size:12px;font-weight:400">/ 2000 kcal</span></b></div><div class="lp-bar-wrap"><i id="lp-bar" style="width:0%"></i></div></div><div class="lp-stats"><span class="lp-prot" id="lp-prot">P <b>0/135g</b></span><span class="lp-pct" id="lp-pct">0%</span></div></div><div id="md"></div><div id="pv"></div>
 <script>
-const APP_VER = '1.5.6';
+const APP_VER = '1.5.7';
 (function(){if(typeof window==='undefined'||!window.fetch)return;fetch('/version.json?_t='+Date.now(),{cache:'no-store'}).then(r=>r.ok?r.json():null).then(d=>{if(d&&d.v&&d.v!==APP_VER){if('caches' in window){caches.keys().then(ks=>Promise.all(ks.map(k=>caches.delete(k)))).then(()=>{if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(regs=>{Promise.all(regs.map(r=>r.unregister())).then(()=>{location.reload(true)})})}else{location.reload(true)}})}else{location.reload(true)}}}).catch(()=>{})})();
 const raw=[
 ["Besan chilla","B","v",280,16,30,10,15,1,"t","Whisk 1/2 cup besan with water, ajwain, salt, chopped onion and chilli into a pourable batter.|Pour onto a hot greased tawa and spread thin.|Cook 2 min per side until golden. Serve with mint chutney.","Indian"],
@@ -441,7 +441,7 @@ const SQ=/^\s*(\d+\s+\d+\/\d+|\d+\/\d+|\d+(?:\.\d+)?)\s*(kg|gms?|grams?|g|ml|l|c
 const CAT=[['Fresh Produce','nutrition'],['Dairy & Eggs','egg'],['Grains & Staples','grain'],['Meat & Seafood','restaurant'],['Oils, Spices & Pantry','kitchen']];
 function parseGroceryLine(raw,factor){
   const l=raw.toLowerCase().trim();
-  const m=l.match(/^([\d\/\.\s-]+)\s*(g|gms?|grams?|kg|ml|l|litres?|cups?|tbsp|tsp|pieces?|pcs?|slices?|pinch|handful|scoop|punnet)?\s*(.*)$/i);
+  const m=l.match(/^([\d\/\.\s-]+)\s*(kg|gms?|grams?|g|litres?|l|ml|cups?|tbsp|tsp|pieces?|pcs?|slices?|pinch|handful|scoop|punnet)?\b\s*(.*)$/i);
   if(!m)return null;
   const numStr=m[1].trim();let val=0;
   if(numStr.includes('/')){
@@ -570,7 +570,7 @@ function parseGroceryLine(raw,factor){
   }
 
   // 2. GRAINS, FLOURS, DALS & STAPLES
-  if(/^roti$|^chapati$|^phulka$|^paratha$|whole-wheat flour|wheat flour/.test(name)){
+  if(/^rotis?$|^chapatis?$|^phulkas?$|^parathas?$|whole-wheat flour|wheat flour/.test(name)){
     return{cat:'Grains & Staples',item:'Whole-wheat atta',qty:unit==='cup'?val*120:val*25,type:'g'}
   }
   if(/kuttu (roti|atta|flour)|kuttu/.test(name)){
